@@ -1,0 +1,251 @@
+<div class="knowledge-header">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-graduation-cap"></i> Knowledge Base</h1>
+            <p>Learn from expert farming guides and best practices</p>
+        </div>
+        
+        <div class="search-filters">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Search articles...">
+            </div>
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-category="all">All</button>
+                <button class="filter-tab" data-category="soil">Soil</button>
+                <button class="filter-tab" data-category="crops">Crops</button>
+                <button class="filter-tab" data-category="fertilizer">Fertilizer</button>
+                <button class="filter-tab" data-category="pest">Pest Control</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="knowledge-content">
+    <div class="container">
+        <div class="articles-grid">
+            <% articles.forEach(article => { %>
+            <div class="article-card" data-category="<%= article.category %>">
+                <div class="article-header">
+                    <div class="article-meta">
+                        <span class="category <%= article.category %>"><%= article.category %></span>
+                        <span class="read-time"><i class="far fa-clock"></i> <%= article.readTime %></span>
+                    </div>
+                    <% if (article.audioAvailable) { %>
+                    <button class="audio-btn" onclick="playAudio(<%= article.id %>)">
+                        <i class="fas fa-volume-up"></i>
+                    </button>
+                    <% } %>
+                </div>
+                
+                <h3><%= article.title %></h3>
+                <p><%= article.content %></p>
+                
+                <div class="article-actions">
+                    <button class="btn-primary" onclick="readArticle(<%= article.id %>)">
+                        <i class="fas fa-book-open"></i> Read More
+                    </button>
+                    <button class="btn-secondary" onclick="saveOffline(<%= article.id %>)">
+                        <i class="fas fa-download"></i> Save Offline
+                    </button>
+                </div>
+                
+                <div class="article-status">
+                    <span class="offline-status" id="offline-<%= article.id %>">
+                        <i class="fas fa-cloud"></i> Online Only
+                    </span>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+        
+        <div class="knowledge-stats">
+            <div class="stat-card">
+                <i class="fas fa-download"></i>
+                <div>
+                    <h4 id="offlineCount">0</h4>
+                    <p>Articles Saved Offline</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-eye"></i>
+                <div>
+                    <h4><%= articles.length %></h4>
+                    <p>Total Articles</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-volume-up"></i>
+                <div>
+                    <h4><%= articles.filter(a => a.audioAvailable).length %></h4>
+                    <p>Audio Available</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Article Modal -->
+<div id="articleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle"></h3>
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div id="modalContent"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-secondary" onclick="closeModal()">Close</button>
+            <button class="btn-primary" onclick="shareArticle()">
+                <i class="fas fa-share"></i> Share
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const articles = <%- JSON.stringify(articles) %>;
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeKnowledge();
+    updateOfflineCount();
+});
+
+function initializeKnowledge() {
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', filterArticles);
+    
+    // Filter tabs
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            filterArticles();
+        });
+    });
+}
+
+function filterArticles() {
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const activeCategory = document.querySelector('.filter-tab.active').dataset.category;
+    const articleCards = document.querySelectorAll('.article-card');
+    
+    articleCards.forEach(card => {
+        const title = card.querySelector('h3').textContent.toLowerCase();
+        const content = card.querySelector('p').textContent.toLowerCase();
+        const category = card.dataset.category;
+        
+        const matchesSearch = title.includes(searchTerm) || content.includes(searchTerm);
+        const matchesCategory = activeCategory === 'all' || category === activeCategory;
+        
+        card.style.display = matchesSearch && matchesCategory ? 'block' : 'none';
+    });
+}
+
+function playAudio(articleId) {
+    // Simulate audio playback
+    const audioBtn = event.target;
+    const originalIcon = audioBtn.innerHTML;
+    
+    audioBtn.innerHTML = '<i class="fas fa-pause"></i>';
+    audioBtn.classList.add('playing');
+    
+    // Simulate 3 seconds of audio
+    setTimeout(() => {
+        audioBtn.innerHTML = originalIcon;
+        audioBtn.classList.remove('playing');
+    }, 3000);
+}
+
+function readArticle(articleId) {
+    const article = articles.find(a => a.id === articleId);
+    if (article) {
+        document.getElementById('modalTitle').textContent = article.title;
+        document.getElementById('modalContent').innerHTML = `
+            <div class="article-meta">
+                <span class="category ${article.category}">${article.category}</span>
+                <span class="read-time"><i class="far fa-clock"></i> ${article.readTime}</span>
+            </div>
+            <p>${article.content}</p>
+            <div class="extended-content">
+                <h4>Detailed Information:</h4>
+                <p>This is where the detailed article content would be displayed. In a real application, this would contain comprehensive farming guidance, step-by-step instructions, images, and additional resources.</p>
+            </div>
+        `;
+        document.getElementById('articleModal').style.display = 'flex';
+    }
+}
+
+function closeModal() {
+    document.getElementById('articleModal').style.display = 'none';
+}
+
+function saveOffline(articleId) {
+    const article = articles.find(a => a.id === articleId);
+    if (article) {
+        // Save to IndexedDB
+        const offlineArticles = JSON.parse(localStorage.getItem('offlineArticles') || '[]');
+        if (!offlineArticles.find(a => a.id === articleId)) {
+            offlineArticles.push(article);
+            localStorage.setItem('offlineArticles', JSON.stringify(offlineArticles));
+            
+            // Update UI
+            const statusElement = document.getElementById(`offline-${articleId}`);
+            statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Available Offline';
+            statusElement.classList.add('offline-available');
+            
+            updateOfflineCount();
+            showNotification('Article saved for offline reading!');
+        }
+    }
+}
+
+function updateOfflineCount() {
+    const offlineArticles = JSON.parse(localStorage.getItem('offlineArticles') || '[]');
+    document.getElementById('offlineCount').textContent = offlineArticles.length;
+    
+    // Update status indicators
+    offlineArticles.forEach(article => {
+        const statusElement = document.getElementById(`offline-${article.id}`);
+        if (statusElement) {
+            statusElement.innerHTML = '<i class="fas fa-check-circle"></i> Available Offline';
+            statusElement.classList.add('offline-available');
+        }
+    });
+}
+
+function shareArticle() {
+    if (navigator.share) {
+        navigator.share({
+            title: document.getElementById('modalTitle').textContent,
+            text: 'Check out this farming article from AgriEcho',
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers that don't support Web Share API
+        const url = window.location.href;
+        navigator.clipboard.writeText(url).then(() => {
+            showNotification('Article URL copied to clipboard!');
+        });
+    }
+}
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+</script>

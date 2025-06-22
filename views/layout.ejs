@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icons/icon-192.png">
+    <meta name="theme-color" content="#2e7d32">
+    <meta name="description" content="AgriEcho - Smart farming assistant with offline capabilities">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="AgriEcho">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-seedling"></i>
+                        <span>AgriEcho</span>
+                    </div>
+                    <div class="connection-status" id="connectionStatus">
+                        <i class="fas fa-wifi"></i>
+                        <span>Online</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <%- body %>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="/" class="nav-item <%= title.includes('AgriEcho') ? 'active' : '' %>">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="/knowledge" class="nav-item <%= title.includes('Knowledge') ? 'active' : '' %>">
+                <i class="fas fa-book"></i>
+                <span>Learn</span>
+            </a>
+            <a href="/weather" class="nav-item <%= title.includes('Weather') ? 'active' : '' %>">
+                <i class="fas fa-cloud-sun"></i>
+                <span>Weather</span>
+            </a>
+            <a href="/sos" class="nav-item <%= title.includes('SOS') ? 'active' : '' %>">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>SOS</span>
+            </a>
+            <a href="/voice" class="nav-item <%= title.includes('Voice') ? 'active' : '' %>">
+                <i class="fas fa-microphone"></i>
+                <span>Ask</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- PWA Install Banner -->
+    <div id="installBanner" class="install-banner" style="display: none;">
+        <div class="install-content">
+            <i class="fas fa-download"></i>
+            <span>Install AgriEcho for offline access</span>
+            <button id="installBtn" class="install-btn">Install</button>
+            <button id="dismissBtn" class="dismiss-btn">&times;</button>
+        </div>
+    </div>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/offline.js"></script>
+
+    <!-- Modern Footer -->
+    <footer class="footer" role="contentinfo" style="background: #2e7d32; color: #fff; padding: 2rem 0; text-align: center; margin-top: 2rem;">
+        <div class="container">
+            <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">
+                <i class="fas fa-seedling"></i> AgriEcho
+            </div>
+            <div style="margin-bottom: 0.5rem;">
+                Smart Farming Assistant &copy; <span id="year"></span> | Made with <span style="color: #ff6b35;">&#10084;</span> for Farmers
+            </div>
+            <div>
+                <a href="/" style="color: #fff; margin: 0 0.5rem; text-decoration: underline;">Home</a>
+                <a href="/knowledge" style="color: #fff; margin: 0 0.5rem; text-decoration: underline;">Knowledge</a>
+                <a href="/weather" style="color: #fff; margin: 0 0.5rem; text-decoration: underline;">Weather</a>
+                <a href="/sos" style="color: #fff; margin: 0 0.5rem; text-decoration: underline;">SOS</a>
+                <a href="/voice" style="color: #fff; margin: 0 0.5rem; text-decoration: underline;">Voice</a>
+            </div>
+        </div>
+        <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+    </footer>
+</body>
+</html>

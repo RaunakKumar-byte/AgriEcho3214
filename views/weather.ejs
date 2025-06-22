@@ -1,0 +1,335 @@
+<div class="weather-header">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-cloud-sun"></i> Weather & Alerts</h1>
+            <p>Stay informed about weather conditions and farming alerts</p>
+        </div>
+    </div>
+</div>
+
+<div class="weather-content">
+    <div class="container">
+        <div class="current-weather">
+            <div class="weather-card main-weather">
+                <div class="weather-icon">
+                    <i class="fas fa-sun" id="weatherIcon"></i>
+                </div>
+                <div class="weather-info">
+                    <div class="temperature">
+                        <span class="temp-value" id="currentTemp">28</span>
+                        <span class="temp-unit">°C</span>
+                    </div>
+                    <div class="weather-desc" id="weatherDesc">Sunny</div>
+                    <div class="weather-location">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span id="currentLocation">Your Location</span>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail">
+                        <i class="fas fa-eye"></i>
+                        <span>Visibility</span>
+                        <strong id="visibility">10 km</strong>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-tint"></i>
+                        <span>Humidity</span>
+                        <strong id="humidity">65%</strong>
+                    </div>
+                    <div class="detail">
+                        <i class="fas fa-wind"></i>
+                        <span>Wind Speed</span>
+                        <strong id="windSpeed">12 km/h</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="forecast-section">
+            <h3>7-Day Forecast</h3>
+            <div class="forecast-grid">
+                <div class="forecast-card">
+                    <div class="day">Today</div>
+                    <i class="fas fa-sun"></i>
+                    <div class="temps">
+                        <span class="high">32°</span>
+                        <span class="low">22°</span>
+                    </div>
+                    <div class="condition">Sunny</div>
+                </div>
+                <div class="forecast-card">
+                    <div class="day">Tomorrow</div>
+                    <i class="fas fa-cloud-sun"></i>
+                    <div class="temps">
+                        <span class="high">29°</span>
+                        <span class="low">20°</span>
+                    </div>
+                    <div class="condition">Partly Cloudy</div>
+                </div>
+                <div class="forecast-card">
+                    <div class="day">Thursday</div>
+                    <i class="fas fa-cloud-rain"></i>
+                    <div class="temps">
+                        <span class="high">26°</span>
+                        <span class="low">18°</span>
+                    </div>
+                    <div class="condition">Light Rain</div>
+                </div>
+                <div class="forecast-card">
+                    <div class="day">Friday</div>
+                    <i class="fas fa-cloud-rain"></i>
+                    <div class="temps">
+                        <span class="high">24°</span>
+                        <span class="low">16°</span>
+                    </div>
+                    <div class="condition">Heavy Rain</div>
+                </div>
+                <div class="forecast-card">
+                    <div class="day">Saturday</div>
+                    <i class="fas fa-cloud"></i>
+                    <div class="temps">
+                        <span class="high">27°</span>
+                        <span class="low">19°</span>
+                    </div>
+                    <div class="condition">Cloudy</div>
+                </div>
+                <div class="forecast-card">
+                    <div class="day">Sunday</div>
+                    <i class="fas fa-sun"></i>
+                    <div class="temps">
+                        <span class="high">30°</span>
+                        <span class="low">21°</span>
+                    </div>
+                    <div class="condition">Clear</div>
+                </div>
+                <div class="forecast-card">
+                    <div class="day">Monday</div>
+                    <i class="fas fa-cloud-sun"></i>
+                    <div class="temps">
+                        <span class="high">31°</span>
+                        <span class="low">23°</span>
+                    </div>
+                    <div class="condition">Partly Cloudy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="alerts-section">
+            <div class="section-header">
+                <h3>Active Weather Alerts</h3>
+                <button class="refresh-btn" onclick="refreshAlerts()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            
+            <div class="alerts-list">
+                <div class="alert-card warning">
+                    <div class="alert-icon">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Heavy Rain Warning</div>
+                        <div class="alert-message">Heavy rainfall expected Thursday-Friday. Protect vulnerable crops and ensure proper drainage.</div>
+                        <div class="alert-time">Valid until: Friday, 6:00 PM</div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-sm" onclick="dismissAlert(this)">Dismiss</button>
+                    </div>
+                </div>
+
+                <div class="alert-card info">
+                    <div class="alert-icon">
+                        <i class="fas fa-info-circle"></i>
+                    </div>
+                    <div class="alert-content">
+                        <div class="alert-title">Irrigation Recommendation</div>
+                        <div class="alert-message">Current soil moisture is optimal. Avoid overwatering for the next 3 days.</div>
+                        <div class="alert-time">Updated: 2 hours ago</div>
+                    </div>
+                    <div class="alert-actions">
+                        <button class="btn-sm" onclick="dismissAlert(this)">Dismiss</button>
+                    </div>
+                </div>
+
+                <% if (alerts && alerts.length > 0) { %>
+                    <% alerts.forEach(alert => { %>
+                    <div class="alert-card <%= alert.severity %>">
+                        <div class="alert-icon">
+                            <i class="fas fa-broadcast-tower"></i>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-title">Official Alert</div>
+                            <div class="alert-message"><%= alert.alert %></div>
+                            <div class="alert-time">
+                                Valid until: <%= alert.validUntil ? new Date(alert.validUntil).toLocaleDateString() : 'Ongoing' %>
+                            </div>
+                        </div>
+                    </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+
+        <div class="farming-tips">
+            <h3>Weather-Based Farming Tips</h3>
+            <div class="tips-grid">
+                <div class="tip-card">
+                    <i class="fas fa-seedling"></i>
+                    <h4>Optimal Planting</h4>
+                    <p>Current conditions are ideal for planting summer crops. Soil temperature is perfect for germination.</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-spray-can"></i>
+                    <h4>Pest Control</h4>
+                    <p>Humid conditions may increase pest activity. Consider preventive spraying after the rain stops.</p>
+                </div>
+                <div class="tip-card">
+                    <i class="fas fa-tractor"></i>
+                    <h4>Field Work</h4>
+                    <p>Avoid heavy machinery operation during rainy days to prevent soil compaction.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initializeWeather();
+    getCurrentLocation();
+    
+    // Update weather every 10 minutes
+    setInterval(updateWeather, 600000);
+});
+
+function initializeWeather() {
+    // Load cached weather data if offline
+    if (!navigator.onLine) {
+        loadOfflineWeatherData();
+    } else {
+        updateWeather();
+    }
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const { latitude, longitude } = position.coords;
+                // In a real app, you would reverse geocode these coordinates
+                document.getElementById('currentLocation').textContent = 'Current Location';
+                updateWeatherForLocation(latitude, longitude);
+            },
+            error => {
+                console.log('Location access denied');
+                document.getElementById('currentLocation').textContent = 'Location Unknown';
+            }
+        );
+    }
+}
+
+function updateWeather() {
+    // Simulate weather API call
+    const weatherData = {
+        temperature: Math.floor(Math.random() * 15) + 20, // 20-35°C
+        condition: ['Sunny', 'Partly Cloudy', 'Cloudy', 'Light Rain'][Math.floor(Math.random() * 4)],
+        humidity: Math.floor(Math.random() * 40) + 40, // 40-80%
+        windSpeed: Math.floor(Math.random() * 20) + 5, // 5-25 km/h
+        visibility: Math.floor(Math.random() * 10) + 5 // 5-15 km
+    };
+    
+    updateWeatherDisplay(weatherData);
+    
+    // Cache weather data for offline use
+    localStorage.setItem('cachedWeatherData', JSON.stringify({
+        ...weatherData,
+        timestamp: Date.now()
+    }));
+}
+
+function updateWeatherDisplay(data) {
+    document.getElementById('currentTemp').textContent = data.temperature;
+    document.getElementById('weatherDesc').textContent = data.condition;
+    document.getElementById('humidity').textContent = data.humidity + '%';
+    document.getElementById('windSpeed').textContent = data.windSpeed + ' km/h';
+    document.getElementById('visibility').textContent = data.visibility + ' km';
+    
+    // Update weather icon based on condition
+    const iconElement = document.getElementById('weatherIcon');
+    const iconMap = {
+        'Sunny': 'fas fa-sun',
+        'Partly Cloudy': 'fas fa-cloud-sun',
+        'Cloudy': 'fas fa-cloud',
+        'Light Rain': 'fas fa-cloud-rain',
+        'Heavy Rain': 'fas fa-cloud-showers-heavy'
+    };
+    iconElement.className = iconMap[data.condition] || 'fas fa-sun';
+}
+
+function loadOfflineWeatherData() {
+    const cachedData = localStorage.getItem('cachedWeatherData');
+    if (cachedData) {
+        const data = JSON.parse(cachedData);
+        const ageHours = (Date.now() - data.timestamp) / (1000 * 60 * 60);
+        
+        if (ageHours < 24) { // Use cached data if less than 24 hours old
+            updateWeatherDisplay(data);
+            showNotification('Showing cached weather data (offline mode)');
+        }
+    }
+}
+
+function updateWeatherForLocation(lat, lon) {
+    // In a real app, this would make an API call with coordinates
+    updateWeather();
+}
+
+function refreshAlerts() {
+    const refreshBtn = document.querySelector('.refresh-btn i');
+    refreshBtn.classList.add('spinning');
+    
+    // Simulate API call
+    setTimeout(() => {
+        refreshBtn.classList.remove('spinning');
+        showNotification('Weather alerts updated');
+    }, 2000);
+}
+
+function dismissAlert(button) {
+    const alertCard = button.closest('.alert-card');
+    alertCard.style.opacity = '0.5';
+    alertCard.style.pointerEvents = 'none';
+    
+    setTimeout(() => {
+        alertCard.style.display = 'none';
+    }, 300);
+}
+
+// Offline/Online event handlers
+window.addEventListener('online', () => {
+    updateWeather();
+    showNotification('Back online - weather data updated');
+});
+
+window.addEventListener('offline', () => {
+    showNotification('Offline mode - showing cached weather data');
+});
+
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+</script>

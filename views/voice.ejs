@@ -1,0 +1,525 @@
+<div class="voice-header">
+    <div class="container">
+        <div class="page-header">
+            <h1><i class="fas fa-microphone-alt"></i> Voice Assistant</h1>
+            <p>Ask questions about farming using your voice</p>
+        </div>
+    </div>
+</div>
+
+<div class="voice-content">
+    <div class="container">
+        <div class="voice-interface">
+            <div class="microphone-section">
+                <div class="mic-container">
+                    <button id="micButton" class="mic-button" onclick="toggleRecording()">
+                        <i class="fas fa-microphone" id="micIcon"></i>
+                    </button>
+                    <div class="mic-status">
+                        <div class="status-indicator" id="statusIndicator"></div>
+                        <span id="micStatus">Tap to start recording</span>
+                    </div>
+                </div>
+                
+                <div class="voice-visualization" id="voiceVisualization">
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                    <div class="wave-bar"></div>
+                </div>
+            </div>
+
+            <div class="language-selection">
+                <label for="languageSelect">Select Language:</label>
+                <select id="languageSelect">
+                    <option value="en-US">English</option>
+                    <option value="hi-IN">हिंदी (Hindi)</option>
+                    <option value="bn-IN">বাংলা (Bengali)</option>
+                    <option value="te-IN">తెలుగు (Telugu)</option>
+                    <option value="ta-IN">தமிழ் (Tamil)</option>
+                    <option value="mr-IN">मराठी (Marathi)</option>
+                    <option value="gu-IN">ગુજરાતી (Gujarati)</option>
+                    <option value="kn-IN">ಕನ್ನಡ (Kannada)</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="conversation-section">
+            <div class="conversation-header">
+                <h3>Conversation</h3>
+                <button class="clear-btn" onclick="clearConversation()">
+                    <i class="fas fa-trash"></i> Clear
+                </button>
+            </div>
+            
+            <div class="conversation-container" id="conversationContainer">
+                <div class="welcome-message">
+                    <div class="assistant-avatar">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="message-content">
+                        <p>Hello! I'm your farming assistant. You can ask me questions about:</p>
+                        <ul>
+                            <li>Crop diseases and treatments</li>
+                            <li>Weather-related farming advice</li>
+                            <li>Soil health and fertilizers</li>
+                            <li>Pest control methods</li>
+                            <li>Best farming practices</li>
+                        </ul>
+                        <p>Just tap the microphone and start speaking!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-questions">
+            <h3>Quick Questions</h3>
+            <div class="questions-grid">
+                <button class="question-btn" onclick="askQuestion('What is the best time to plant rice?')">
+                    <i class="fas fa-seedling"></i>
+                    <span>Best time to plant rice?</span>
+                </button>
+                <button class="question-btn" onclick="askQuestion('How to control aphids on crops?')">
+                    <i class="fas fa-bug"></i>
+                    <span>Control aphids on crops?</span>
+                </button>
+                <button class="question-btn" onclick="askQuestion('What fertilizer is good for tomatoes?')">
+                    <i class="fas fa-leaf"></i>
+                    <span>Fertilizer for tomatoes?</span>
+                </button>
+                <button class="question-btn" onclick="askQuestion('How to improve soil quality?')">
+                    <i class="fas fa-mountain"></i>
+                    <span>Improve soil quality?</span>
+                </button>
+                <button class="question-btn" onclick="askQuestion('Signs of plant diseases?')">
+                    <i class="fas fa-search"></i>
+                    <span>Plant disease signs?</span>
+                </button>
+                <button class="question-btn" onclick="askQuestion('Weather impact on farming?')">
+                    <i class="fas fa-cloud-rain"></i>
+                    <span>Weather impact?</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="voice-history">
+            <div class="history-header">
+                <h3>Recent Questions</h3>
+                <span class="history-count" id="historyCount">0 questions asked</span>
+            </div>
+            <div class="history-list" id="historyList">
+                <!-- History items will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let recognition = null;
+let isRecording = false;
+let conversationHistory = JSON.parse(localStorage.getItem('voiceConversationHistory') || '[]');
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeVoiceRecognition();
+    loadConversationHistory();
+    updateHistoryCount();
+});
+
+function initializeVoiceRecognition() {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = document.getElementById('languageSelect').value;
+
+        recognition.onstart = function() {
+            isRecording = true;
+            updateMicStatus('Listening...', 'recording');
+            startVoiceVisualization();
+        };
+
+        recognition.onresult = function(event) {
+            let finalTranscript = '';
+            let interimTranscript = '';
+
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript;
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+
+            if (finalTranscript) {
+                processVoiceQuery(finalTranscript);
+            }
+        };
+
+        recognition.onerror = function(event) {
+            console.error('Speech recognition error:', event.error);
+            updateMicStatus('Error occurred. Try again.', 'error');
+            stopRecording();
+        };
+
+        recognition.onend = function() {
+            stopRecording();
+        };
+
+        // Language change handler
+        document.getElementById('languageSelect').addEventListener('change', function() {
+            recognition.lang = this.value;
+        });
+    } else {
+        showNotification('Speech recognition not supported in this browser', 'error');
+        document.getElementById('micButton').disabled = true;
+    }
+}
+
+function toggleRecording() {
+    if (isRecording) {
+        stopRecording();
+    } else {
+        startRecording();
+    }
+}
+
+function startRecording() {
+    if (recognition) {
+        recognition.start();
+    }
+}
+
+function stopRecording() {
+    if (recognition && isRecording) {
+        recognition.stop();
+    }
+    isRecording = false;
+    updateMicStatus('Tap to start recording', 'idle');
+    stopVoiceVisualization();
+}
+
+function updateMicStatus(message, status) {
+    const micIcon = document.getElementById('micIcon');
+    const micStatus = document.getElementById('micStatus');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const micButton = document.getElementById('micButton');
+
+    micStatus.textContent = message;
+    
+    // Remove all status classes
+    micButton.className = 'mic-button';
+    statusIndicator.className = 'status-indicator';
+    
+    // Add current status class
+    micButton.classList.add(status);
+    statusIndicator.classList.add(status);
+    
+    // Update icon
+    if (status === 'recording') {
+        micIcon.className = 'fas fa-stop';
+    } else if (status === 'processing') {
+        micIcon.className = 'fas fa-spinner';
+    } else {
+        micIcon.className = 'fas fa-microphone';
+    }
+}
+
+function startVoiceVisualization() {
+    const visualization = document.getElementById('voiceVisualization');
+    visualization.classList.add('active');
+}
+
+function stopVoiceVisualization() {
+    const visualization = document.getElementById('voiceVisualization');
+    visualization.classList.remove('active');
+}
+
+async function processVoiceQuery(query) {
+    updateMicStatus('Processing...', 'processing');
+    
+    // Add user message to conversation
+    addMessageToConversation(query, 'user');
+    
+    try {
+        const response = await fetch('/api/voice-query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                query: query,
+                language: document.getElementById('languageSelect').value
+            })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            addMessageToConversation(result.response, 'assistant');
+            speakResponse(result.response);
+        } else {
+            throw new Error(result.error || 'Failed to process query');
+        }
+    } catch (error) {
+        console.error('Error processing voice query:', error);
+        
+        // Store query offline
+        storeQueryOffline(query);
+        
+        const offlineResponse = getOfflineResponse(query);
+        addMessageToConversation(offlineResponse, 'assistant');
+        speakResponse(offlineResponse);
+    }
+    
+    updateMicStatus('Tap to start recording', 'idle');
+}
+
+function askQuestion(question) {
+    processVoiceQuery(question);
+}
+
+function getOfflineResponse(query) {
+    const lowerQuery = query.toLowerCase();
+    
+    if (lowerQuery.includes('rice') || lowerQuery.includes('planting')) {
+        return "The best time to plant rice is during the monsoon season, typically between June and July. Ensure your fields have adequate water supply.";
+    } else if (lowerQuery.includes('aphid') || lowerQuery.includes('pest')) {
+        return "To control aphids, you can use neem oil spray or introduce beneficial insects like ladybugs. Regular monitoring is key.";
+    } else if (lowerQuery.includes('tomato') || lowerQuery.includes('fertilizer')) {
+        return "For tomatoes, use a balanced fertilizer with NPK ratio of 10-10-10. Add compost for organic matter.";
+    } else if (lowerQuery.includes('soil')) {
+        return "To improve soil quality, add organic matter like compost, practice crop rotation, and test soil pH regularly.";
+    } else if (lowerQuery.includes('disease')) {
+        return "Common signs of plant diseases include yellowing leaves, spots, wilting, and stunted growth. Proper spacing and ventilation help prevent diseases.";
+    } else if (lowerQuery.includes('weather')) {
+        return "Weather greatly impacts farming. Monitor forecasts, protect crops during extreme weather, and adjust irrigation based on rainfall.";
+    } else {
+        return "Thank you for your question. I'm currently offline, but your question has been saved. I'll provide a detailed answer when connectivity is restored.";
+    }
+}
+
+function storeQueryOffline(query) {
+    const offlineQueries = JSON.parse(localStorage.getItem('offlineVoiceQueries') || '[]');
+    offlineQueries.push({
+        query: query,
+        timestamp: new Date().toISOString(),
+        language: document.getElementById('languageSelect').value
+    });
+    localStorage.setItem('offlineVoiceQueries', JSON.stringify(offlineQueries));
+}
+
+function speakResponse(text) {
+    if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        
+        // Set language based on selection
+        const selectedLang = document.getElementById('languageSelect').value;
+        utterance.lang = selectedLang;
+        
+        // Find appropriate voice
+        const voices = speechSynthesis.getVoices();
+        const voice = voices.find(v => v.lang.startsWith(selectedLang.substring(0, 2)));
+        if (voice) {
+            utterance.voice = voice;
+        }
+        
+        utterance.rate = 0.9;
+        utterance.pitch = 1;
+        
+        speechSynthesis.speak(utterance);
+    }
+}
+
+function addMessageToConversation(message, sender) {
+    const container = document.getElementById('conversationContainer');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${sender}`;
+    
+    const timestamp = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    if (sender === 'user') {
+        messageDiv.innerHTML = `
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="message-content">
+                <p>${message}</p>
+                <span class="timestamp">${timestamp}</span>
+            </div>
+        `;
+    } else {
+        messageDiv.innerHTML = `
+            <div class="assistant-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="message-content">
+                <p>${message}</p>
+                <span class="timestamp">${timestamp}</span>
+            </div>
+        `;
+    }
+    
+    container.appendChild(messageDiv);
+    container.scrollTop = container.scrollHeight;
+    
+    // Save to conversation history
+    conversationHistory.push({
+        message: message,
+        sender: sender,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Keep only last 50 messages
+    if (conversationHistory.length > 50) {
+        conversationHistory = conversationHistory.slice(-50);
+    }
+    
+    localStorage.setItem('voiceConversationHistory', JSON.stringify(conversationHistory));
+    
+    if (sender === 'user') {
+        updateHistoryCount();
+        addToRecentQuestions(message);
+    }
+}
+
+function loadConversationHistory() {
+    const container = document.getElementById('conversationContainer');
+    
+    conversationHistory.forEach(item => {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${item.sender}`;
+        
+        const timestamp = new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        if (item.sender === 'user') {
+            messageDiv.innerHTML = `
+                <div class="user-avatar">
+                    <i class="fas fa-user"></i>
+                </div>
+                <div class="message-content">
+                    <p>${item.message}</p>
+                    <span class="timestamp">${timestamp}</span>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="assistant-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>${item.message}</p>
+                    <span class="timestamp">${timestamp}</span>
+                </div>
+            `;
+        }
+        
+        container.appendChild(messageDiv);
+    });
+    
+    container.scrollTop = container.scrollHeight;
+}
+
+function clearConversation() {
+    if (confirm('Are you sure you want to clear the conversation history?')) {
+        conversationHistory = [];
+        localStorage.removeItem('voiceConversationHistory');
+        
+        const container = document.getElementById('conversationContainer');
+        container.innerHTML = `
+            <div class="welcome-message">
+                <div class="assistant-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="message-content">
+                    <p>Conversation cleared. How can I help you today?</p>
+                </div>
+            </div>
+        `;
+        
+        updateHistoryCount();
+        showNotification('Conversation history cleared', 'success');
+    }
+}
+
+function updateHistoryCount() {
+    const userMessages = conversationHistory.filter(item => item.sender === 'user').length;
+    document.getElementById('historyCount').textContent = `${userMessages} question${userMessages !== 1 ? 's' : ''} asked`;
+}
+
+function addToRecentQuestions(question) {
+    const historyList = document.getElementById('historyList');
+    const recentQuestions = JSON.parse(localStorage.getItem('recentVoiceQuestions') || '[]');
+    
+    // Add new question to the beginning
+    recentQuestions.unshift({
+        question: question,
+        timestamp: new Date().toISOString()
+    });
+    
+    // Keep only last 5 questions
+    if (recentQuestions.length > 5) {
+        recentQuestions.pop();
+    }
+    
+    localStorage.setItem('recentVoiceQuestions', JSON.stringify(recentQuestions));
+    
+    // Update UI
+    historyList.innerHTML = '';
+    recentQuestions.forEach(item => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+            <div class="history-question" onclick="askQuestion('${item.question.replace(/'/g, "\\'")}')">
+                <i class="fas fa-history"></i>
+                <span>${item.question}</span>
+            </div>
+            <div class="history-time">${new Date(item.timestamp).toLocaleDateString()}</div>
+        `;
+        historyList.appendChild(historyItem);
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                     type === 'error' ? 'fa-exclamation-circle' : 
+                     type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Load recent questions on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const recentQuestions = JSON.parse(localStorage.getItem('recentVoiceQuestions') || '[]');
+    const historyList = document.getElementById('historyList');
+    
+    recentQuestions.forEach(item => {
+        const historyItem = document.createElement('div');
+        historyItem.className = 'history-item';
+        historyItem.innerHTML = `
+            <div class="history-question" onclick="askQuestion('${item.question.replace(/'/g, "\\'")}')">
+                <i class="fas fa-history"></i>
+                <span>${item.question}</span>
+            </div>
+            <div class="history-time">${new Date(item.timestamp).toLocaleDateString()}</div>
+        `;
+        historyList.appendChild(historyItem);
+    });
+});
+</script>

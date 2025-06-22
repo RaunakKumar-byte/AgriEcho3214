@@ -1,0 +1,432 @@
+<div class="sos-header">
+    <div class="container">
+        <div class="page-header emergency">
+            <h1><i class="fas fa-exclamation-triangle"></i> Emergency SOS</h1>
+            <p>Send emergency alerts for immediate assistance</p>
+        </div>
+    </div>
+</div>
+
+<div class="sos-content">
+    <div class="container">
+        <div class="quick-actions">
+            <h3>Quick Emergency Actions</h3>
+            <div class="quick-buttons">
+                <button class="emergency-btn critical" onclick="sendQuickSOS('crop-disease')">
+                    <i class="fas fa-bug"></i>
+                    <span>Crop Disease</span>
+                </button>
+                <button class="emergency-btn warning" onclick="sendQuickSOS('weather-damage')">
+                    <i class="fas fa-cloud-bolt"></i>
+                    <span>Weather Damage</span>
+                </button>
+                <button class="emergency-btn critical" onclick="sendQuickSOS('equipment-failure')">
+                    <i class="fas fa-tools"></i>
+                    <span>Equipment Failure</span>
+                </button>
+                <button class="emergency-btn warning" onclick="sendQuickSOS('pest-attack')">
+                    <i class="fas fa-spider"></i>
+                    <span>Pest Attack</span>
+                </button>
+                <button class="emergency-btn critical" onclick="sendQuickSOS('medical-emergency')">
+                    <i class="fas fa-ambulance"></i>
+                    <span>Medical Emergency</span>
+                </button>
+                <button class="emergency-btn info" onclick="sendQuickSOS('need-help')">
+                    <i class="fas fa-hands-helping"></i>
+                    <span>Need Help</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="sos-form-section">
+            <div class="form-card">
+                <h3>Detailed Emergency Report</h3>
+                <form id="sosForm" onsubmit="sendDetailedSOS(event)">
+                    <div class="form-group">
+                        <label for="emergencyType">Type of Emergency</label>
+                        <select id="emergencyType" required>
+                            <option value="">Select emergency type</option>
+                            <option value="crop-disease">Crop Disease</option>
+                            <option value="weather-damage">Weather Damage</option>
+                            <option value="pest-attack">Pest Attack</option>
+                            <option value="equipment-failure">Equipment Failure</option>
+                            <option value="medical-emergency">Medical Emergency</option>
+                            <option value="natural-disaster">Natural Disaster</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="severity">Severity Level</label>
+                        <div class="severity-options">
+                            <label class="severity-option">
+                                <input type="radio" name="severity" value="low" required>
+                                <span class="severity-indicator low"></span>
+                                <span>Low - Can wait</span>
+                            </label>
+                            <label class="severity-option">
+                                <input type="radio" name="severity" value="medium" required>
+                                <span class="severity-indicator medium"></span>
+                                <span>Medium - Need help soon</span>
+                            </label>
+                            <label class="severity-option">
+                                <input type="radio" name="severity" value="high" required>
+                                <span class="severity-indicator high"></span>
+                                <span>High - Urgent</span>
+                            </label>
+                            <label class="severity-option">
+                                <input type="radio" name="severity" value="critical" required>
+                                <span class="severity-indicator critical"></span>
+                                <span>Critical - Immediate help needed</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Location Details</label>
+                        <div class="location-input">
+                            <input type="text" id="location" placeholder="Describe your location or address">
+                            <button type="button" class="location-btn" onclick="getCurrentLocation()">
+                                <i class="fas fa-map-marker-alt"></i> Use Current Location
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="message">Describe the Emergency</label>
+                        <textarea id="message" rows="4" placeholder="Describe what happened and what help you need..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact">Contact Information</label>
+                        <input type="tel" id="contact" placeholder="Your phone number for emergency contact">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="clearForm()">
+                            <i class="fas fa-times"></i> Clear
+                        </button>
+                        <button type="submit" class="btn-emergency">
+                            <i class="fas fa-paper-plane"></i> Send SOS Alert
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="sos-status">
+            <h3>Emergency Status</h3>
+            <div class="status-cards">
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-signal" id="connectionIcon"></i>
+                    </div>
+                    <div class="status-info">
+                        <h4>Connection Status</h4>
+                        <p id="connectionStatus">Online - Alerts sent immediately</p>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="status-info">
+                        <h4>Pending Alerts</h4>
+                        <p id="pendingCount">0 alerts waiting to be sent</p>
+                    </div>
+                </div>
+
+                <div class="status-card">
+                    <div class="status-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="status-info">
+                        <h4>Sent Today</h4>
+                        <p id="sentCount">0 alerts sent successfully</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="emergency-contacts">
+            <h3>Emergency Contacts</h3>
+            <div class="contacts-grid">
+                <div class="contact-card">
+                    <i class="fas fa-hospital"></i>
+                    <h4>Medical Emergency</h4>
+                    <p>108 - National Ambulance Service</p>
+                    <button class="btn-call" onclick="makeCall('108')">
+                        <i class="fas fa-phone"></i> Call Now
+                    </button>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h4>Police</h4>
+                    <p>100 - Police Control Room</p>
+                    <button class="btn-call" onclick="makeCall('100')">
+                        <i class="fas fa-phone"></i> Call Now
+                    </button>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-fire"></i>
+                    <h4>Fire Department</h4>
+                    <p>101 - Fire & Rescue Services</p>
+                    <button class="btn-call" onclick="makeCall('101')">
+                        <i class="fas fa-phone"></i> Call Now
+                    </button>
+                </div>
+
+                <div class="contact-card">
+                    <i class="fas fa-seedling"></i>
+                    <h4>Agricultural Officer</h4>
+                    <p>Local Agriculture Department</p>
+                    <button class="btn-call" onclick="makeCall('agri-officer')">
+                        <i class="fas fa-phone"></i> Contact
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentLocation = null;
+let pendingAlerts = JSON.parse(localStorage.getItem('pendingSOSAlerts') || '[]');
+
+document.addEventListener('DOMContentLoaded', function() {
+    initializeSOS();
+    updateConnectionStatus();
+    updatePendingCount();
+    
+    // Check connection status every 30 seconds
+    setInterval(updateConnectionStatus, 30000);
+});
+
+function initializeSOS() {
+    // Try to sync pending alerts if online
+    if (navigator.onLine) {
+        syncPendingAlerts();
+    }
+}
+
+function sendQuickSOS(type) {
+    const emergencyTypes = {
+        'crop-disease': 'Crop disease outbreak detected',
+        'weather-damage': 'Crops damaged by weather conditions',
+        'equipment-failure': 'Farming equipment breakdown',
+        'pest-attack': 'Severe pest infestation',
+        'medical-emergency': 'Medical emergency on farm',
+        'need-help': 'General farming assistance needed'
+    };
+
+    const sosData = {
+        id: Date.now(),
+        type: type,
+        message: emergencyTypes[type],
+        severity: type === 'medical-emergency' ? 'critical' : 'high',
+        location: currentLocation || 'Location not available',
+        contact: '',
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+    };
+
+    if (navigator.onLine) {
+        sendSOSToServer(sosData);
+    } else {
+        saveSOSOffline(sosData);
+    }
+}
+
+function sendDetailedSOS(event) {
+    event.preventDefault();
+    
+    const formData = new FormData(event.target);
+    const sosData = {
+        id: Date.now(),
+        type: formData.get('emergencyType') || document.getElementById('emergencyType').value,
+        message: document.getElementById('message').value,
+        severity: formData.get('severity'),
+        location: document.getElementById('location').value || currentLocation || 'Location not available',
+        contact: document.getElementById('contact').value,
+        timestamp: new Date().toISOString(),
+        status: 'pending'
+    };
+
+    if (navigator.onLine) {
+        sendSOSToServer(sosData);
+    } else {
+        saveSOSOffline(sosData);
+    }
+}
+
+async function sendSOSToServer(sosData) {
+    try {
+        const response = await fetch('/api/sos', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(sosData)
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+            showNotification('SOS alert sent successfully!', 'success');
+            clearForm();
+            updateSentCount();
+        } else {
+            throw new Error(result.error || 'Failed to send SOS');
+        }
+    } catch (error) {
+        console.error('Error sending SOS:', error);
+        saveSOSOffline(sosData);
+        showNotification('SOS saved offline - will send when connection is restored', 'warning');
+    }
+}
+
+function saveSOSOffline(sosData) {
+    pendingAlerts.push(sosData);
+    localStorage.setItem('pendingSOSAlerts', JSON.stringify(pendingAlerts));
+    updatePendingCount();
+    showNotification('SOS alert saved offline - will send when online', 'info');
+}
+
+async function syncPendingAlerts() {
+    if (pendingAlerts.length === 0) return;
+
+    const alertsToSend = [...pendingAlerts];
+    
+    for (const alert of alertsToSend) {
+        try {
+            const response = await fetch('/api/sos', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(alert)
+            });
+
+            if (response.ok) {
+                // Remove successfully sent alert
+                pendingAlerts = pendingAlerts.filter(a => a.id !== alert.id);
+            }
+        } catch (error) {
+            console.error('Error syncing alert:', error);
+            break; // Stop trying if there's a connection issue
+        }
+    }
+    
+    localStorage.setItem('pendingSOSAlerts', JSON.stringify(pendingAlerts));
+    updatePendingCount();
+    
+    if (alertsToSend.length > pendingAlerts.length) {
+        showNotification(`${alertsToSend.length - pendingAlerts.length} pending alerts sent successfully`, 'success');
+    }
+}
+
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            position => {
+                const { latitude, longitude } = position.coords;
+                currentLocation = `Lat: ${latitude.toFixed(4)}, Lon: ${longitude.toFixed(4)}`;
+                document.getElementById('location').value = currentLocation;
+                showNotification('Location captured successfully', 'success');
+            },
+            error => {
+                console.error('Error getting location:', error);
+                showNotification('Could not get your location', 'error');
+            }
+        );
+    } else {
+        showNotification('Geolocation is not supported by this browser', 'error');
+    }
+}
+
+function clearForm() {
+    document.getElementById('sosForm').reset();
+}
+
+function updateConnectionStatus() {
+    const connectionIcon = document.getElementById('connectionIcon');
+    const connectionStatus = document.getElementById('connectionStatus');
+    
+    if (navigator.onLine) {
+        connectionIcon.className = 'fas fa-wifi';
+        connectionStatus.textContent = 'Online - Alerts sent immediately';
+        connectionStatus.parentElement.parentElement.className = 'status-card online';
+    } else {
+        connectionIcon.className = 'fas fa-wifi-slash';
+        connectionStatus.textContent = 'Offline - Alerts will be queued';
+        connectionStatus.parentElement.parentElement.className = 'status-card offline';
+    }
+}
+
+function updatePendingCount() {
+    document.getElementById('pendingCount').textContent = 
+        `${pendingAlerts.length} alert${pendingAlerts.length !== 1 ? 's' : ''} waiting to be sent`;
+}
+
+function updateSentCount() {
+    const sentToday = JSON.parse(localStorage.getItem('sentTodayCount') || '0');
+    const newCount = sentToday + 1;
+    localStorage.setItem('sentTodayCount', JSON.stringify(newCount));
+    document.getElementById('sentCount').textContent = `${newCount} alert${newCount !== 1 ? 's' : ''} sent successfully`;
+}
+
+function makeCall(number) {
+    if (number === 'agri-officer') {
+        showNotification('Contact your local agricultural officer', 'info');
+        return;
+    }
+    
+    if ('serviceWorker' in navigator) {
+        // In a real app, you might want to show confirmation before calling
+        if (confirm(`Do you want to call ${number}?`)) {
+            window.location.href = `tel:${number}`;
+        }
+    } else {
+        showNotification(`Emergency number: ${number}`, 'info');
+    }
+}
+
+// Network event listeners
+window.addEventListener('online', () => {
+    updateConnectionStatus();
+    syncPendingAlerts();
+    showNotification('Back online - syncing pending alerts', 'success');
+});
+
+window.addEventListener('offline', () => {
+    updateConnectionStatus();
+    showNotification('Gone offline - alerts will be queued', 'warning');
+});
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <i class="fas ${type === 'success' ? 'fa-check-circle' : 
+                     type === 'error' ? 'fa-exclamation-circle' : 
+                     type === 'warning' ? 'fa-exclamation-triangle' : 'fa-info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.classList.add('show');
+    }, 100);
+    
+    setTimeout(() => {
+        notification.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 4000);
+}
+</script>
