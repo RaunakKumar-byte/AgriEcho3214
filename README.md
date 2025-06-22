@@ -8,7 +8,7 @@ AgriEcho is a Progressive Web App (PWA) designed to help farmers in remote areas
 - 📊 MongoDB-backed disaster reporting system
 
 ## 🔗 Live Demo
-👉 [Visit AgriEcho App](https://your-render-url.onrender.com)
+👉 [Visit AgriEcho App](https://agriecho3214.onrender.com)
 
 ## 🚀 Tech Stack
 - Node.js + Express.js
